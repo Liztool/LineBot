@@ -1,12 +1,25 @@
-from flask import Flask, request, abort
+from flask import Flask, request
 import requests
 import datetime
 import os
 
 app = Flask(__name__)
 
-CHANNEL_ACCESS_TOKEN = "pQNfJtvwbb5dRup2oyJKo+3gjd3b3mqJFAfuBq5f8fM/uStUOlFDpQHMIR+fP8nOTTkD8c2xlwirYwWx8+izapE4CB5oeugrHtfqTyGruF6lMWkYvxt4yWf4HL7mBeBhdohu57ragbZ03GERuXkN2QdB04t89/1O/w1cDnyilFU="
-USER_ID = "U151594c7fb7d826fd8fba8261e7164ed"
+CHANNEL_ACCESS_TOKEN = os.getenv("TOKEN")
+USER_ID = os.getenv("USER_ID")
+
+# 用檔案存目標日（簡單版）
+TARGET_FILE = "target_day.txt"
+
+def get_target_day():
+    if not os.path.exists(TARGET_FILE):
+        return 25  # 預設
+    with open(TARGET_FILE, "r") as f:
+        return int(f.read())
+
+def set_target_day(day):
+    with open(TARGET_FILE, "w") as f:
+        f.write(str(day))
 
 def send_message(text):
     url = "https://api.line.me/v2/bot/message/push"
@@ -20,17 +33,35 @@ def send_message(text):
     }
     requests.post(url, headers=headers, json=data)
 
-# 👉 自訂：每月哪一天
-TARGET_DAY = 25
+# 🔹 LINE webhook（用來設定日期）
+@app.route("/webhook", methods=['POST'])
+def webhook():
+    data = request.json
+    event = data["events"][0]
+    text = event["message"]["text"]
 
+    if text.startswith("設定"):
+        try:
+            day = int(text.replace("設定", "").strip())
+            if 1 <= day <= 31:
+                set_target_day(day)
+                send_message(f"已設定每月 {day} 號")
+            else:
+                send_message("請輸入1~31")
+        except:
+            send_message("格式錯誤，例如：設定 25")
+
+    return "ok"
+
+# 🔹 cron 觸發（一天4次）
 @app.route("/cron")
 def cron_job():
     now = datetime.datetime.now()
-
     tomorrow = now + datetime.timedelta(days=1)
 
-    # 如果明天是目標日
-    if tomorrow.day == TARGET_DAY:
+    target_day = get_target_day()
+
+    if tomorrow.day == target_day:
         hour = now.hour
 
         if hour == 9:
@@ -42,4 +73,8 @@ def cron_job():
         elif hour == 22:
             send_message("睡前提醒")
 
+    return "ok"
+
+@app.route("/")
+def home():
     return "ok"
