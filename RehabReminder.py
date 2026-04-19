@@ -62,10 +62,12 @@ def update_cron(day):
     }
 
     data = {
-        "enabled": True,
-        "cronExpression": schedule,
-        "url": "https://linebot-rehab.onrender.com/cron",
-        "requestMethod": "GET"
+        "job": {
+            "enabled": True,
+            "schedule": schedule,
+            "url": "https://linebot-rehab.onrender.com/cron",
+            "requestMethod": "GET"
+        }
     }
         
     try:
