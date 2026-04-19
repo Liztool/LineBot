@@ -64,9 +64,19 @@ def update_cron(day):
     data = {
         "job": {
             "enabled": True,
-            "cronExpression": schedule,
             "url": "https://linebot-rehab.onrender.com/cron",
             "requestMethod": "GET"
+            "schedule": {
+                "timezone": "Asia/Taipei",
+                
+                "hours": [9, 12, 18, 22],
+                "minutes": [0],
+
+                # 👉 關鍵：只指定「前一天」
+                "mdays": [cron_day],
+
+                "months": [-1]
+            }
         }
     }
         
