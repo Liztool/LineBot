@@ -62,16 +62,14 @@ def update_cron(day):
     }
 
     data = {
-        "job": {
-            "enabled": True,
-            "schedule": schedule,
-            "url": "https://你的網址.onrender.com/cron",
-            "requestMethod": "GET"
-        }
+        "enabled": True,
+        "cronExpression": schedule,
+        "url": "https://linebot-rehab.onrender.com/cron",
+        "requestMethod": "GET"
     }
-
+        
     try:
-        r = requests.patch(url, json=data, headers=headers)
+        r = requests.put(url, json=data, headers=headers)
         print("cron update status:", r.status_code)
         print("cron response:", r.text)
 
