@@ -71,7 +71,7 @@ def update_cron(day):
     }
         
     try:
-        r = requests.put(url, json=data, headers=headers)
+        r = requests.patch(url, json=data, headers=headers)
         print("cron update status:", r.status_code)
         print("cron response:", r.text)
 
