@@ -82,9 +82,7 @@ def update_cron(month, day):
 
         if r.status_code != 200:
             send_message("⚠️ cron 更新失敗，請檢查設定")
-        else:
-            send_message(f"✅ cron 已更新：前一天 {cron_day} 號")
-
+        
     except Exception as e:
         print("cron error:", str(e))
         send_message("❌ cron 更新錯誤")
