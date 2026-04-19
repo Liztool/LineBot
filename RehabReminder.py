@@ -27,17 +27,17 @@ def send_message(text):
     }
     requests.post(url, headers=headers, json=data)
 
-# ===== 儲存目標日期（支援月/日） =====
-def set_target(month, day):
+# ===== 儲存目標（月/日/時間） =====
+def set_target(month, day, hour, minute):
     with open(TARGET_FILE, "w") as f:
-        f.write(f"{month},{day}")
+        f.write(f"{month},{day},{hour},{minute}")
 
 def get_target():
     if not os.path.exists(TARGET_FILE):
-        return None, None
+        return None, None, None, None
     with open(TARGET_FILE, "r") as f:
-        m, d = f.read().split(",")
-        return int(m), int(d)
+        m, d, h, mi = f.read().split(",")
+        return int(m), int(d), int(h), int(mi)
 
 # ===== 計算前一天 =====
 def get_previous_date(month, day):
@@ -65,7 +65,7 @@ def update_cron(month, day):
             "schedule": {
                 "timezone": "Asia/Taipei",
                 
-                "hours": [9, 12, 18, 22],
+                "hours": [9, 12, 20, 23],
                 "minutes": [0],
 
                 # 👉 關鍵：只指定「前一天」
@@ -98,19 +98,26 @@ def webhook():
     except:
         return "ok"
 
-    if "/" in text:
+    # 👉 格式：4/21 19:00
+    if " " in text and "/" in text:
         try:
-            m, d = text.split("/")
+            date_part, time_part = text.split(" ")
+
+            m, d = date_part.split("/")
+            hour, minute = time_part.split(":")
+
             m = int(m)
             d = int(d)
+            hour = int(hour)
+            minute = int(minute)
 
-            set_target(m, d)
+            set_target(m, d, hour, minute)
             update_cron(m, d)
 
             send_message(f"📅 已設定 {m}/{d}（前一天提醒）")
 
         except:
-            send_message("❌ 格式錯誤，例如：4/21")
+            send_message("❌ 格式錯誤，例如：11/14 14:00")
 
     return "ok"
 
@@ -118,7 +125,7 @@ def webhook():
 @app.route("/cron")
 def cron_job():
     now = datetime.datetime.now()
-    target_m, target_d = get_target()
+    target_m, target_d, target_h, target_min = get_target()
 
     if not target_m:
         return "no target"
@@ -130,16 +137,17 @@ def cron_job():
         hour = now.hour
 
         if hour == 9:
-            send_message("🌅 早安提醒")
+            send_message(f"🌅 {target_m}/{target_d} {target_h:02d}:{target_min:02d} 復健")
         elif hour == 12:
-            send_message("🍱 中午提醒")
-        elif hour == 18:
-            send_message("🌆 晚上提醒")
-        elif hour == 22:
-            send_message("🌙 睡前提醒")
+            send_message(f"🍱 {target_m}/{target_d} {target_h:02d}:{target_min:02d} 復健")
+        elif hour == 20:
+            send_message(f"🌆 {target_m}/{target_d} {target_h:02d}:{target_min:02d} 復健")
+        elif hour == 23:
+            send_message(f"🌙 {target_m}/{target_d} {target_h:02d}:{target_min:02d} 復健")
 
     return "ok"
 
+# ===== health =====
 @app.route("/")
 def home():
     return "ok"
