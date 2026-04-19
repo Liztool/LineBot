@@ -65,7 +65,7 @@ def update_cron(day):
         "job": {
             "enabled": True,
             "url": "https://linebot-rehab.onrender.com/cron",
-            "requestMethod": "GET"
+            "requestMethod": "GET",
             "schedule": {
                 "timezone": "Asia/Taipei",
                 
