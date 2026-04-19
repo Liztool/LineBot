@@ -14,7 +14,7 @@ CRON_JOB_ID = os.getenv("CRON_JOB_ID")
 
 TARGET_FILE = "target_day.txt"
 
-# ===== 工具 =====
+# ===== LINE 推播 =====
 def send_message(text):
     url = "https://api.line.me/v2/bot/message/push"
     headers = {
@@ -27,32 +27,28 @@ def send_message(text):
     }
     requests.post(url, headers=headers, json=data)
 
-def get_target_day():
-    if not os.path.exists(TARGET_FILE):
-        return 25
-    with open(TARGET_FILE, "r") as f:
-        return int(f.read())
-
-def set_target_day(day):
+# ===== 儲存目標日期（支援月/日） =====
+def set_target(month, day):
     with open(TARGET_FILE, "w") as f:
-        f.write(str(day))
+        f.write(f"{month},{day}")
 
-# 👉 修正月份問題（1號 → 上個月最後一天）
-def get_previous_day(target_day):
+def get_target():
+    if not os.path.exists(TARGET_FILE):
+        return None, None
+    with open(TARGET_FILE, "r") as f:
+        m, d = f.read().split(",")
+        return int(m), int(d)
+
+# ===== 計算前一天 =====
+def get_previous_date(month, day):
     today = datetime.date.today()
-    first_day_this_month = today.replace(day=1)
-    last_day_prev_month = first_day_this_month - datetime.timedelta(days=1)
-
-    if target_day == 1:
-        return last_day_prev_month.day
-    else:
-        return target_day - 1
+    target = datetime.date(today.year, month, day)
+    prev = target - datetime.timedelta(days=1)
+    return prev.month, prev.day
 
 # ===== 更新 cron-job =====
-def update_cron(day):
-    cron_day = get_previous_day(day)
-
-    schedule = f"0 9,12,18,22 {cron_day} * *"
+def update_cron(month, day):
+    cron_m, cron_d = get_previous_date(month, day)
 
     url = f"https://api.cron-job.org/jobs/{CRON_JOB_ID}"
 
@@ -73,9 +69,8 @@ def update_cron(day):
                 "minutes": [0],
 
                 # 👉 關鍵：只指定「前一天」
-                "mdays": [cron_day],
-
-                "months": [-1]
+                "mdays": [cron_d],
+                "months": [cron_m],
             }
         }
     }
@@ -105,19 +100,19 @@ def webhook():
     except:
         return "ok"
 
-    if text.startswith("設定"):
+    if "/" in text:
         try:
-            day = int(text.replace("設定", "").strip())
+            m, d = text.split("/")
+            m = int(m)
+            d = int(d)
 
-            if 1 <= day <= 31:
-                set_target_day(day)
-                update_cron(day)
-                send_message(f"📅 已設定每月 {day} 號")
-            else:
-                send_message("❌ 請輸入 1~31")
+            set_target(m, d)
+            update_cron(m, d)
+
+            send_message(f"📅 已設定 {m}/{d}（前一天提醒）")
 
         except:
-            send_message("❌ 格式錯誤，例如：設定 25")
+            send_message("❌ 格式錯誤，例如：4/21")
 
     return "ok"
 
@@ -125,11 +120,15 @@ def webhook():
 @app.route("/cron")
 def cron_job():
     now = datetime.datetime.now()
+    target_m, target_d = get_target()
+
+    if not target_m:
+        return "no target"
+
     tomorrow = now + datetime.timedelta(days=1)
 
-    target_day = get_target_day()
-
-    if tomorrow.day == target_day:
+    # 👉 判斷是否為前一天
+    if tomorrow.month == target_m and tomorrow.day == target_d:
         hour = now.hour
 
         if hour == 9:
