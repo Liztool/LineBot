@@ -47,7 +47,7 @@ def get_previous_date(month, day):
     return prev.month, prev.day
 
 # ===== 更新 cron-job =====
-def update_cron(month, day):
+def update_cron(month, day, hour, minute):
     cron_m, cron_d = get_previous_date(month, day)
 
     url = f"https://api.cron-job.org/jobs/{CRON_JOB_ID}"
@@ -57,23 +57,24 @@ def update_cron(month, day):
         "Content-Type": "application/json"
     }
 
+    # 👉 帶參數
+    cron_url = f"https://linebot-rehab.onrender.com/cron?m={month}&d={day}&h={hour}&mi={minute}"
+
     data = {
         "job": {
             "enabled": True,
-            "url": "https://linebot-rehab.onrender.com/cron",
+            "url": cron_url,
             "requestMethod": "GET",
             "schedule": {
                 "timezone": "Asia/Taipei",
-                
-                "hours": [9, 12, 20, 23],
-                "minutes": [0],
-
-                # 👉 關鍵：只指定「前一天」
+                "hours": [9, 12, 17, 23],
+                "minutes": [40],
                 "mdays": [cron_d],
                 "months": [cron_m],
             }
         }
     }
+
         
     try:
         r = requests.patch(url, json=data, headers=headers)
@@ -112,7 +113,7 @@ def webhook():
             minute = int(minute)
 
             set_target(m, d, hour, minute)
-            update_cron(m, d)
+            update_cron(m, d, hour, minute)
 
             send_message(f"📅 已設定 {m}/{d}（前一天提醒）")
 
@@ -125,10 +126,15 @@ def webhook():
 @app.route("/cron")
 def cron_job():
     now = datetime.datetime.now()
-    target_m, target_d, target_h, target_min = get_target()
-
-    if not target_m:
-        return "no target"
+    
+    # 👉 從 URL 拿資料
+    try:
+        target_m = int(request.args.get("m"))
+        target_d = int(request.args.get("d"))
+        target_h = int(request.args.get("h"))
+        target_min = int(request.args.get("mi"))
+    except:
+        return "missing params"
 
     tomorrow = now + datetime.timedelta(days=1)
 
@@ -140,7 +146,7 @@ def cron_job():
             send_message(f"🌅 {target_m}/{target_d} {target_h:02d}:{target_min:02d} 復健")
         elif hour == 12:
             send_message(f"🍱 {target_m}/{target_d} {target_h:02d}:{target_min:02d} 復健")
-        elif hour == 20:
+        elif hour == 17:
             send_message(f"🌆 {target_m}/{target_d} {target_h:02d}:{target_min:02d} 復健")
         elif hour == 23:
             send_message(f"🌙 {target_m}/{target_d} {target_h:02d}:{target_min:02d} 復健")
