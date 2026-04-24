@@ -11,6 +11,7 @@ USER_ID = os.getenv("USER_ID")
 
 CRON_API_KEY = os.getenv("CRON_API_KEY")
 CRON_JOB_ID = os.getenv("CRON_JOB_ID")
+COLD_CRON_JOB_ID = os.getenv("COLD_CRON_JOB_ID")
 
 TARGET_FILE = "target_day.txt"
 
@@ -56,7 +57,7 @@ def update_cron(month, day, hour, minute):
             "schedule": {
                 "timezone": "Asia/Taipei",
                 "hours": [9, 12, 18, 23],
-                "minutes": [30],
+                "minutes": [50],
                 "mdays": [cron_d],
                 "months": [cron_m],
             }
@@ -94,7 +95,7 @@ def update_cold_cron(month, day):
             "schedule": {
                 "timezone": "Asia/Taipei",
                 "hours": [8, 11, 18, 22],
-                "minutes": [25],
+                "minutes": [45],
                 "mdays": [cron_d],
                 "months": [cron_m],
             }
@@ -172,7 +173,7 @@ def cron_job():
             send_message(f"🌅 {target_m}/{target_d} {target_h:02d}:{target_min:02d} 復健")
         elif hour == 12:
             send_message(f"🍱 {target_m}/{target_d} {target_h:02d}:{target_min:02d} 復健")
-        elif hour == 20:
+        elif hour == 18:
             send_message(f"🌆 {target_m}/{target_d} {target_h:02d}:{target_min:02d} 復健")
         elif hour == 23:
             send_message(f"🌙 {target_m}/{target_d} {target_h:02d}:{target_min:02d} 復健")
