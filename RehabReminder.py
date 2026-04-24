@@ -67,8 +67,8 @@ def update_cron(month, day, hour, minute):
             "requestMethod": "GET",
             "schedule": {
                 "timezone": "Asia/Taipei",
-                "hours": [9, 12, 17, 23],
-                "minutes": [40],
+                "hours": [9, 12, 20, 23],
+                "minutes": [0],
                 "mdays": [cron_d],
                 "months": [cron_m],
             }
@@ -99,7 +99,7 @@ def webhook():
     except:
         return "ok"
 
-    # 👉 格式：4/21 19:00
+    # 👉 格式：11/14 14:00
     if " " in text and "/" in text:
         try:
             date_part, time_part = text.split(" ")
@@ -146,7 +146,7 @@ def cron_job():
             send_message(f"🌅 {target_m}/{target_d} {target_h:02d}:{target_min:02d} 復健")
         elif hour == 12:
             send_message(f"🍱 {target_m}/{target_d} {target_h:02d}:{target_min:02d} 復健")
-        elif hour == 17:
+        elif hour == 20:
             send_message(f"🌆 {target_m}/{target_d} {target_h:02d}:{target_min:02d} 復健")
         elif hour == 23:
             send_message(f"🌙 {target_m}/{target_d} {target_h:02d}:{target_min:02d} 復健")
