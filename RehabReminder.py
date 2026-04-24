@@ -27,18 +27,6 @@ def send_message(text):
     }
     requests.post(url, headers=headers, json=data)
 
-# ===== 儲存目標（月/日/時間） =====
-def set_target(month, day, hour, minute):
-    with open(TARGET_FILE, "w") as f:
-        f.write(f"{month},{day},{hour},{minute}")
-
-def get_target():
-    if not os.path.exists(TARGET_FILE):
-        return None, None, None, None
-    with open(TARGET_FILE, "r") as f:
-        m, d, h, mi = f.read().split(",")
-        return int(m), int(d), int(h), int(mi)
-
 # ===== 計算前一天 =====
 def get_previous_date(month, day):
     today = datetime.date.today()
@@ -67,8 +55,46 @@ def update_cron(month, day, hour, minute):
             "requestMethod": "GET",
             "schedule": {
                 "timezone": "Asia/Taipei",
-                "hours": [9, 12, 20, 23],
-                "minutes": [0],
+                "hours": [9, 12, 18, 23],
+                "minutes": [30],
+                "mdays": [cron_d],
+                "months": [cron_m],
+            }
+        }
+    }
+
+        
+    try:
+        r = requests.patch(url, json=data, headers=headers)
+        print("cron update status:", r.status_code)
+        print("cron response:", r.text)
+
+        if r.status_code != 200:
+            send_message("⚠️ cron 更新失敗，請檢查設定")
+        
+    except Exception as e:
+        print("cron error:", str(e))
+        send_message("❌ cron 更新錯誤")
+
+# ===== 更新 冷cron-job =====
+def update_cold_cron(month, day):
+    cron_m, cron_d = get_previous_date(month, day)
+
+    url = f"https://api.cron-job.org/jobs/{COLD_CRON_JOB_ID}"
+
+    headers = {
+        "Authorization": f"Bearer {CRON_API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    data = {
+        "job": {
+            "enabled": True,
+            "requestMethod": "GET",
+            "schedule": {
+                "timezone": "Asia/Taipei",
+                "hours": [8, 11, 18, 22],
+                "minutes": [25],
                 "mdays": [cron_d],
                 "months": [cron_m],
             }
@@ -112,8 +138,8 @@ def webhook():
             hour = int(hour)
             minute = int(minute)
 
-            set_target(m, d, hour, minute)
             update_cron(m, d, hour, minute)
+            update_cold_cron(m, d)
 
             send_message(f"📅 已設定 {m}/{d}（前一天提醒）")
 
