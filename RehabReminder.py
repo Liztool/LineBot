@@ -2,6 +2,7 @@ from flask import Flask, request
 import requests
 import datetime
 import os
+import threading
 
 app = Flask(__name__)
 
@@ -179,14 +180,14 @@ def cron_job():
         elif hour == 17:
             send_message(f"🌙 {target_m}/{target_d} {target_h:02d}:{target_min:02d} 復健")
 
-    return "ok"
-
     print("NOW:", now)
     print("TARGET:", target_m, target_d)
     print("TOMORROW:", tomorrow.month, tomorrow.day)
     print("HOUR:", now.hour)
+    
+    return "ok"
 
 # ===== health =====
-@app.route("/")
+@app.route("/cold")
 def home():
     return "alive", 200
