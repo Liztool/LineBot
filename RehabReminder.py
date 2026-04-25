@@ -56,8 +56,8 @@ def update_cron(month, day, hour, minute):
             "requestMethod": "GET",
             "schedule": {
                 "timezone": "Asia/Taipei",
-                "hours": 14, 15, 16, 17],
-                "minutes": [5],
+                "hours": [14, 15, 16, 17],
+                "minutes": [20],
                 "mdays": [cron_d],
                 "months": [cron_m],
             }
@@ -94,8 +94,8 @@ def update_cold_cron(month, day):
             "requestMethod": "GET",
             "schedule": {
                 "timezone": "Asia/Taipei",
-                "hours": 14, 15, 16, 17],
-                "minutes": [0],
+                "hours": [14, 15, 16, 17],
+                "minutes": [15],
                 "mdays": [cron_d],
                 "months": [cron_m],
             }
