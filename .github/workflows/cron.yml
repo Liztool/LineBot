@@ -1,0 +1,16 @@
+name: LINE Cron Job
+
+on:
+  schedule:
+    - cron: "15 * * * *"
+
+  workflow_dispatch:  # 讓你可以手動測試
+
+jobs:
+  call-api:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Call Render Cron
+        run: |
+          curl -X GET "https://你的-render-url.onrender.com/cold"
