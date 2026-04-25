@@ -3,6 +3,7 @@ import requests
 import datetime
 import os
 import threading
+import pytz
 
 app = Flask(__name__)
 
@@ -154,7 +155,8 @@ def webhook():
 @app.route("/cron")
 def cron_job():
 
-    now = datetime.datetime.now()
+    tz = pytz.timezone("Asia/Taipei")
+    now = datetime.datetime.now(tz)
     
     # 👉 從 URL 拿資料
     try:
