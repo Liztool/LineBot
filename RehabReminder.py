@@ -56,8 +56,8 @@ def update_cron(month, day, hour, minute):
             "requestMethod": "GET",
             "schedule": {
                 "timezone": "Asia/Taipei",
-                "hours": [9, 12, 13, 14],
-                "minutes": [20],
+                "hours": 14, 15, 16, 17],
+                "minutes": [5],
                 "mdays": [cron_d],
                 "months": [cron_m],
             }
@@ -94,8 +94,8 @@ def update_cold_cron(month, day):
             "requestMethod": "GET",
             "schedule": {
                 "timezone": "Asia/Taipei",
-                "hours": [8, 12, 13, 22],
-                "minutes": [15],
+                "hours": 14, 15, 16, 17],
+                "minutes": [0],
                 "mdays": [cron_d],
                 "months": [cron_m],
             }
@@ -170,18 +170,23 @@ def cron_job():
     if tomorrow.month == target_m and tomorrow.day == target_d:
         hour = now.hour
 
-        if hour == 9:
+        if hour == 14:
             send_message(f"🌅 {target_m}/{target_d} {target_h:02d}:{target_min:02d} 復健")
-        elif hour == 12:
+        elif hour == 15:
             send_message(f"🍱 {target_m}/{target_d} {target_h:02d}:{target_min:02d} 復健")
-        elif hour == 13:
+        elif hour == 16:
             send_message(f"🌆 {target_m}/{target_d} {target_h:02d}:{target_min:02d} 復健")
-        elif hour == 14:
+        elif hour == 17:
             send_message(f"🌙 {target_m}/{target_d} {target_h:02d}:{target_min:02d} 復健")
 
     return "ok"
 
+    print("NOW:", now)
+    print("TARGET:", target_m, target_d)
+    print("TOMORROW:", tomorrow.month, tomorrow.day)
+    print("HOUR:", now.hour)
+
 # ===== health =====
 @app.route("/")
 def home():
-    return "ok"
+    return "alive", 200
