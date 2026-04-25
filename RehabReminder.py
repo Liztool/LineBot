@@ -2,7 +2,6 @@ from flask import Flask, request
 import requests
 import datetime
 import os
-import threading
 import pytz
 
 app = Flask(__name__)
@@ -14,8 +13,6 @@ USER_ID = os.getenv("USER_ID")
 CRON_API_KEY = os.getenv("CRON_API_KEY")
 CRON_JOB_ID = os.getenv("CRON_JOB_ID")
 COLD_CRON_JOB_ID = os.getenv("COLD_CRON_JOB_ID")
-
-TARGET_FILE = "target_day.txt"
 
 # ===== LINE 推播 =====
 def send_message(text):
@@ -58,8 +55,8 @@ def update_cron(month, day, hour, minute):
             "requestMethod": "GET",
             "schedule": {
                 "timezone": "Asia/Taipei",
-                "hours": [14, 15, 16, 17],
-                "minutes": [20],
+                "hours": [9, 12, 18, 20, 22],
+                "minutes": [30],
                 "mdays": [cron_d],
                 "months": [cron_m],
             }
@@ -96,8 +93,8 @@ def update_cold_cron(month, day):
             "requestMethod": "GET",
             "schedule": {
                 "timezone": "Asia/Taipei",
-                "hours": [14, 15, 16, 17],
-                "minutes": [15],
+                "hours": [9, 12, 18, 20, 22],
+                "minutes": [25],
                 "mdays": [cron_d],
                 "months": [cron_m],
             }
@@ -173,23 +170,20 @@ def cron_job():
     if tomorrow.month == target_m and tomorrow.day == target_d:
         hour = now.hour
 
-        if hour == 14:
+        if hour == 9:
             send_message(f"🌅 {target_m}/{target_d} {target_h:02d}:{target_min:02d} 復健")
-        elif hour == 15:
+        elif hour == 12:
             send_message(f"🍱 {target_m}/{target_d} {target_h:02d}:{target_min:02d} 復健")
-        elif hour == 16:
+        elif hour == 18:
             send_message(f"🌆 {target_m}/{target_d} {target_h:02d}:{target_min:02d} 復健")
-        elif hour == 17:
+        elif hour == 20:
             send_message(f"🌙 {target_m}/{target_d} {target_h:02d}:{target_min:02d} 復健")
-
-    print("NOW:", now)
-    print("TARGET:", target_m, target_d)
-    print("TOMORROW:", tomorrow.month, tomorrow.day)
-    print("HOUR:", now.hour)
+        elif hour == 22:
+            send_message(f"🌙 {target_m}/{target_d} {target_h:02d}:{target_min:02d} 復健")
     
     return "ok"
 
 # ===== health =====
-@app.route("/cold")
+@app.route("/")
 def home():
     return "alive", 200
