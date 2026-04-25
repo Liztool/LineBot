@@ -56,8 +56,8 @@ def update_cron(month, day, hour, minute):
             "requestMethod": "GET",
             "schedule": {
                 "timezone": "Asia/Taipei",
-                "hours": [9, 12, 18, 23],
-                "minutes": [50],
+                "hours": [9, 12, 13, 14],
+                "minutes": [20],
                 "mdays": [cron_d],
                 "months": [cron_m],
             }
@@ -94,8 +94,8 @@ def update_cold_cron(month, day):
             "requestMethod": "GET",
             "schedule": {
                 "timezone": "Asia/Taipei",
-                "hours": [8, 11, 18, 22],
-                "minutes": [45],
+                "hours": [8, 12, 13, 22],
+                "minutes": [15],
                 "mdays": [cron_d],
                 "months": [cron_m],
             }
@@ -152,6 +152,10 @@ def webhook():
 # ===== cron 觸發 =====
 @app.route("/cron")
 def cron_job():
+
+    threading.Thread(target=do_job).start()
+    return "ok", 200
+
     now = datetime.datetime.now()
     
     # 👉 從 URL 拿資料
@@ -173,9 +177,9 @@ def cron_job():
             send_message(f"🌅 {target_m}/{target_d} {target_h:02d}:{target_min:02d} 復健")
         elif hour == 12:
             send_message(f"🍱 {target_m}/{target_d} {target_h:02d}:{target_min:02d} 復健")
-        elif hour == 18:
+        elif hour == 13:
             send_message(f"🌆 {target_m}/{target_d} {target_h:02d}:{target_min:02d} 復健")
-        elif hour == 23:
+        elif hour == 14:
             send_message(f"🌙 {target_m}/{target_d} {target_h:02d}:{target_min:02d} 復健")
 
     return "ok"
