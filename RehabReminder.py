@@ -153,9 +153,6 @@ def webhook():
 @app.route("/cron")
 def cron_job():
 
-    threading.Thread(target=do_job).start()
-    return "ok", 200
-
     now = datetime.datetime.now()
     
     # 👉 從 URL 拿資料
