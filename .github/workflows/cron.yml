@@ -1,10 +1,7 @@
 name: LINE Cron Job
 
 on:
-  schedule:
-    - cron: "15 * * * *"
-
-  workflow_dispatch:  # 讓你可以手動測試
+  workflow_dispatch:
 
 jobs:
   call-api:
