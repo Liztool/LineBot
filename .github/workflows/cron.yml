@@ -13,4 +13,4 @@ jobs:
     steps:
       - name: Call Render Cron
         run: |
-          curl -X GET "https://你的-render-url.onrender.com/cold"
+          curl -X GET "https://linebot-rehab.onrender.com/cold"
