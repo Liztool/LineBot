@@ -90,7 +90,7 @@ def update_cold_cron(month, day):
     data = {
         "job": {
             "enabled": True,
-            "requestMethod": "POST",
+            "requestMethod": 1,
             "schedule": {
                 "timezone": "Asia/Taipei",
                 "hours": [9, 12, 18, 20, 22],
